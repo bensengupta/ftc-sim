@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "outDir": "./dist/",
-    "module": "es6",
+    "module": "commonjs",
+    "esModuleInterop": true,
     "target": "es5",
-    "jsx": "react",
+    "lib": ["es2020", "dom"],
     "allowJs": true,
     "strict": true,
     "sourceMap": true

@@ -10,14 +10,8 @@ var pd2 = pi / 2,
   pm4 = pi * 4;
 
 class Point {
-  x: number;
-  y: number;
-  z: number;
   i: Symbol;
-  constructor(x = 0, y = 0, z = 0) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
+  constructor(public x = 0, public y = 0, public z = 0) {
     this.i = Symbol();
   }
   rotate(rx = 0, ry = 0, rz = 0, origin = { x: 0, y: 0, z: 0 }) {

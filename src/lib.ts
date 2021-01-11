@@ -1,10 +1,8 @@
-// @ts-nocheck
-
 var pi = Math.PI,
   cos = Math.cos,
   sin = Math.sin,
   asin = Math.asin,
-  round = (number) => {
+  round = (number: number) => {
     return Math.round(number * 1e9) * 1e-9;
   };
 var pd2 = pi / 2,
@@ -12,6 +10,10 @@ var pd2 = pi / 2,
   pm4 = pi * 4;
 
 class Point {
+  x: number;
+  y: number;
+  z: number;
+  i: Symbol;
   constructor(x = 0, y = 0, z = 0) {
     this.x = x;
     this.y = y;
@@ -49,29 +51,36 @@ class Point {
       round(z + origin.z)
     );
   }
-  affineFunction(point2) {
-    a = (point2.x - this.x) / (this.y - point2.y);
-    b = point2.y - a * point2.x;
+  affineFunction(point2: Point) {
+    var a = (point2.x - this.x) / (this.y - point2.y);
+    var b = point2.y - a * point2.x;
     return { CM: a, oo: b };
   }
 }
 
 class Path3D {
-  constructor(...points) {
+  unrotated3dPlane: Point[];
+  start: Point[];
+  path2D: HTMLElement;
+  rotateX = 0;
+  rotateY = 0;
+  rotateZ = 0;
+  origin = new Point(0, 0);
+  constructor(...points: Point[]) {
     this.unrotated3dPlane = this.start = points;
     this.path2D = document.createElement("path");
   }
   get rotated3dPlane() {
     var result = [];
-    for (point of this.unrotated3dPlane)
+    for (var point of this.unrotated3dPlane)
       result.push(
         point.rotate(this.rotateX, this.rotateY, this.rotateZ, this.origin)
       );
     return result;
   }
   rotate(rx = 0, ry = 0, rz = 0, origin = { x: 0, y: 0, z: 0 }) {
-    var result = [];
-    for (point of this.unrotated3dPlane)
+    var result: Point[] = [];
+    for (var point of this.unrotated3dPlane)
       result.push(point.rotate(rx, ry, rz, origin));
     this.unrotated3dPlane = result;
     return this;
@@ -79,7 +88,7 @@ class Path3D {
   async display(origin = { x: 0, y: 0 }) {
     console.log(origin, this.unrotated3dPlane);
     var str = "";
-    for await (point of this.unrotated3dPlane) {
+    for await (var point of this.unrotated3dPlane) {
       console.log(
         (this.unrotated3dPlane.indexOf(point) === 0 ? "M " : " L ") +
           (origin.x + point.x) +
@@ -96,14 +105,14 @@ class Path3D {
     this.path2D.setAttribute("d", str + " z");
     return this.path2D;
   }
-  intersects(path2) {
-    for (p of this.unrotated3dPlane) {
+  intersects(path2: Path3D) {
+    for (var p of this.unrotated3dPlane) {
       var aff = p.affineFunction(
         this.unrotated3dPlane[
           (this.unrotated3dPlane.indexOf(p) + 1) % this.unrotated3dPlane
         ]
       );
-      for (p2 of path2.unrotated3dPlane) {
+      for (var p2 of path2.unrotated3dPlane) {
         var aff2 = p2.affineFunction(
           path2.unrotated3dPlane[
             (path2.unrotated3dPlane.indexOf(p2) + 1) % path2.unrotated3dPlane
@@ -114,17 +123,17 @@ class Path3D {
       }
     }
   }
-  set rotation(r) {
+  set rotation(r: { x: number; y: number; z: number }) {
     this.unrotated3dPlane = this.start;
     this.rotate((r.x, r.y, r.z));
   }
-  set fill(f) {
+  set fill(f: string) {
     this.path2D.style.fill = f;
   }
-  set stroke(s) {
+  set stroke(s: string) {
     this.path2D.style.stroke = s;
   }
-  set strokeWidth(w) {
+  set strokeWidth(w: string) {
     this.path2D.style.strokeWidth = w;
   }
 }

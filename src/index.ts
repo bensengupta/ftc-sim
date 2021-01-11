@@ -38,7 +38,7 @@ var path1 = new Path3D(...points2);
 var path2 = new Path3D(...points3);
 var path3 = new Path3D(...points4);
 var path4 = new Path3D(...points5);
-var obj = new Object3D(path1, path2 , path3, path4);
+var obj = new Object3D(path1, path2, path3, path4);
 console.log(obj);
 var path2d = document.createElement("path");
 path1.fill = "yellow";
@@ -55,12 +55,16 @@ path4.stroke = "#0000";
 path4.strokeWidth = "1";
 console.log([0, 1, 2, 3, 4, 5, 6, 7, 8, 9].indexOf(0) === 0);
 svg.insert(obj);
-svg.Perspective = 5E2
-obj.rotate()
+svg.Perspective = 5e2;
+obj.rotate();
+
 svg.display();
 
-setInterval(async function () {
+function animate() {
   svg.insert(obj);
-  obj.rotate(3e-2, 2e-2, 1e-2);
+  obj.rotate(8e-3, 6e-3, 2.5e-3);
   svg.display();
-}, 100);
+  requestAnimationFrame(animate);
+}
+
+requestAnimationFrame(animate);

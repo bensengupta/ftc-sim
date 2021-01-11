@@ -45,8 +45,10 @@ class Point {
       x = cos(angle) * r;
       y = sin(angle) * r;
     }
-    var x1 = /*round(*/x + origin.x/*)*/, y1 = /*round(*/y + origin.y/*)*/, z1 = /*round(*/z + origin.z/*)*/;
-    return new Point(x1,y1,z1)
+    var x1 = /*round(*/ x + origin.x /*)*/,
+      y1 = /*round(*/ y + origin.y /*)*/,
+      z1 = /*round(*/ z + origin.z; /*)*/
+    return new Point(x1, y1, z1);
   }
   affineFunction(point2: Point) {
     var a = (point2.x - this.x) / (this.y - point2.y);
@@ -88,12 +90,12 @@ class Path3D {
     // console.log(origin, this.unrotated3dPlane);
     var str = "";
     for await (let point of this.unrotated3dPlane) {
-      var coef = (this.perspective > .003 ? (1 + point.z / this.perspective) : 1)
+      var coef = this.perspective > 0.003 ? 1 + point.z / this.perspective : 1;
       str +=
         (this.unrotated3dPlane.indexOf(point) === 0 ? "M " : " L ") +
-        (origin.x + point.x*coef) +
+        (origin.x + point.x * coef) +
         "," +
-        (origin.y - point.y*coef);
+        (origin.y - point.y * coef);
       // console.log(str);
     }
     this.path2D.setAttribute("d", str + " z");
@@ -103,13 +105,14 @@ class Path3D {
     for (let p of this.unrotated3dPlane) {
       var aff = p.affineFunction(
         this.unrotated3dPlane[
-        (this.unrotated3dPlane.indexOf(p) + 1) % this.unrotated3dPlane.length
+          (this.unrotated3dPlane.indexOf(p) + 1) % this.unrotated3dPlane.length
         ]
       );
       for (let p2 of path2.unrotated3dPlane) {
         var aff2 = p2.affineFunction(
           path2.unrotated3dPlane[
-          (path2.unrotated3dPlane.indexOf(p2) + 1) % path2.unrotated3dPlane.length
+            (path2.unrotated3dPlane.indexOf(p2) + 1) %
+              path2.unrotated3dPlane.length
           ]
         );
         var x = (aff.oo - aff2.oo) / (aff2.CM - aff.CM);
@@ -168,9 +171,9 @@ class Object3D {
 class SVG3D {
   svg: SVGSVGElement;
   elements: { [key: string]: Path3D[] } = {};
-  o: { x: number, y: number };
+  o: { x: number; y: number };
   constructor(
-    svg = document.createElementNS('https://www.w3.org/2000/svg', "svg"),
+    svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"),
     origin = { x: 0.5, y: 0.5 }
   ) {
     this.svg = svg;
@@ -203,8 +206,7 @@ class SVG3D {
   }
   set Perspective(p: number) {
     for (let id in this.elements)
-      for (let path of this.elements[id])
-          path.perspective = p;
+      for (let path of this.elements[id]) path.perspective = p;
   }
 }
 

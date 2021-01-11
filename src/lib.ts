@@ -60,7 +60,7 @@ class Point {
 class Path3D {
   unrotated3dPlane: Point[];
   start: Point[];
-  path2D: HTMLElement;
+  path2D: SVGPathElement;
   rotateX = 0;
   rotateY = 0;
   rotateZ = 0;
@@ -68,7 +68,10 @@ class Path3D {
   perspective: number;
   constructor(...points: Point[]) {
     this.unrotated3dPlane = this.start = points;
-    this.path2D = document.createElement("path");
+    this.path2D = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "path"
+    );
     this.perspective = 0;
   }
   get rotated3dPlane() {
@@ -86,10 +89,10 @@ class Path3D {
     this.unrotated3dPlane = result;
     return this;
   }
-  async display(origin = { x: 0, y: 0 }) {
+  display(origin = { x: 0, y: 0 }) {
     // console.log(origin, this.unrotated3dPlane);
     var str = "";
-    for await (let point of this.unrotated3dPlane) {
+    for (let point of this.unrotated3dPlane) {
       var coef = this.perspective > 0.003 ? 1 + point.z / this.perspective : 1;
       str +=
         (this.unrotated3dPlane.indexOf(point) === 0 ? "M " : " L ") +
@@ -186,15 +189,12 @@ class SVG3D {
   remove(...objects: Object3D[]) {
     for (let object of objects) delete this.elements[object.id];
   }
-  async display() {
+  display() {
     this.svg.innerHTML = "";
     for (let id in this.elements)
-      for await (let path of this.elements[id]) {
+      for (let path of this.elements[id]) {
         var div = document.createElement("div");
-        div.insertAdjacentElement(
-          "afterbegin",
-          await path.display(this.origin)
-        );
+        div.insertAdjacentElement("afterbegin", path.display(this.origin));
         this.svg.insertAdjacentHTML("beforeend", div.innerHTML);
       }
     // console.log(this.svg.innerHTML);

@@ -40,7 +40,7 @@ var path3 = new Path3D(...points4);
 var path4 = new Path3D(...points5);
 var obj = new Object3D(path1, path2, path3, path4);
 console.log(obj);
-var path2d = document.createElement("path");
+var path2d = document.createElementNS("http://www.w3.org/2000/svg", "path");
 path1.fill = "yellow";
 path1.stroke = "#0000";
 path1.strokeWidth = "1";
@@ -68,3 +68,6 @@ function animate() {
 }
 
 requestAnimationFrame(animate);
+
+// Try removing if you have issues with hot-reloading
+if (module.hot) module.hot.accept();

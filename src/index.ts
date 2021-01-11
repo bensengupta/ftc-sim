@@ -6,17 +6,6 @@ var svg = new SVG3D(document.querySelector("svg"));
 // console.log(svg.svg)
 // document.querySelector('svg') = svg.svg;
 var point = new Point(1, 1, 1);
-console.log(point.rotate());
-var sy = Symbol();
-var sy2 = Symbol();
-var obj = {
-  t: "test",
-  [sy]: "hi",
-  [sy2]: "hello",
-};
-console.log(obj[sy]);
-console.log(obj[sy2]);
-for (i in obj) console.log(i);
 var points = [
   new Point(1, 1, 1),
   new Point(1, 1, -1),

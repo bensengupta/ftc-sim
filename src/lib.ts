@@ -71,7 +71,7 @@ class Path3D {
   }
   rotate(rx = 0, ry = 0, rz = 0, origin = { x: 0, y: 0, z: 0 }) {
     var result = [];
-    for (point of this.unrotated3dPlane)
+    for (let point of this.unrotated3dPlane)
       result.push(point.rotate(rx, ry, rz, origin));
     this.unrotated3dPlane = result;
     return this;
@@ -79,7 +79,7 @@ class Path3D {
   async display(origin = { x: 0, y: 0 }) {
     console.log(origin, this.unrotated3dPlane);
     var str = "";
-    for await (point of this.unrotated3dPlane) {
+    for await (let point of this.unrotated3dPlane) {
       console.log(
         (this.unrotated3dPlane.indexOf(point) === 0 ? "M " : " L ") +
           (origin.x + point.x) +
@@ -97,13 +97,13 @@ class Path3D {
     return this.path2D;
   }
   intersects(path2) {
-    for (p of this.unrotated3dPlane) {
+    for (let p of this.unrotated3dPlane) {
       var aff = p.affineFunction(
         this.unrotated3dPlane[
           (this.unrotated3dPlane.indexOf(p) + 1) % this.unrotated3dPlane
         ]
       );
-      for (p2 of path2.unrotated3dPlane) {
+      for (let p2 of path2.unrotated3dPlane) {
         var aff2 = p2.affineFunction(
           path2.unrotated3dPlane[
             (path2.unrotated3dPlane.indexOf(p2) + 1) % path2.unrotated3dPlane

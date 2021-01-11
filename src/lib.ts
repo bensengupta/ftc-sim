@@ -139,6 +139,12 @@ intersects(path2: Path3D) {
 }
 
 class Object3D {
+  unrotated3dPlane: Path3D[];
+  id: string;
+  rotateX = 0;
+  rotateY = 0;
+  rotateZ = 0;
+  origin = new Point(0, 0);
   constructor(...paths: Path3D[]) {
     this.unrotated3dPlane = paths;
     this.id = new ID().value;
@@ -160,12 +166,14 @@ class Object3D {
     console.log(result);
     this.unrotated3dPlane = result;
   }
-  set rotation(r) {
+  set rotation(r:{ x: number; y: number; z: number }) {
     for (let path of this.unrotated3dPlane) path.rotation = r;
   }
 }
 
 class SVG3D {
+  svg: HTMLElement;
+  o: {x:number,y:number};
   constructor(
     svg = document.createElement("svg"),
     origin = { x: 0.5, y: 0.5 }
@@ -174,11 +182,11 @@ class SVG3D {
     this.elements = {};
     this.o = origin;
   }
-  insert(...objects) {
+  insert(...objects: Object3D[]) {
     for (let object of objects)
       this.elements[object.id] = object.unrotated3dPlane;
   }
-  remove(...objects) {
+  remove(...objects: Object3D[]) {
     for (let object of objects) this.elements[object.id] = undefined;
   }
   async display() {

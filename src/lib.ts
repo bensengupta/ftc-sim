@@ -63,7 +63,7 @@ class Path3D {
   }
   get rotated3dPlane() {
     var result = [];
-    for (point of this.unrotated3dPlane)
+    for (let point of this.unrotated3dPlane)
       result.push(
         point.rotate(this.rotateX, this.rotateY, this.rotateZ, this.origin)
       );

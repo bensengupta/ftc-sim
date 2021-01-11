@@ -109,13 +109,13 @@ intersects(path2: Path3D) {
     for (let p of this.unrotated3dPlane) {
       var aff = p.affineFunction(
         this.unrotated3dPlane[
-          (this.unrotated3dPlane.indexOf(p) + 1) % this.unrotated3dPlane
+          (this.unrotated3dPlane.indexOf(p) + 1) % this.unrotated3dPlane.length
         ]
       );
       for (let p2 of path2.unrotated3dPlane) {
         var aff2 = p2.affineFunction(
           path2.unrotated3dPlane[
-            (path2.unrotated3dPlane.indexOf(p2) + 1) % path2.unrotated3dPlane
+            (path2.unrotated3dPlane.indexOf(p2) + 1) % path2.unrotated3dPlane.length
           ]
         );
         var x = (aff.oo - aff2.oo) / (aff2.CM - aff.CM);
@@ -173,13 +173,13 @@ class Object3D {
 
 class SVG3D {
   svg: HTMLElement;
+  elements: { [key: string]: Path3D[] } = {};
   o: {x:number,y:number};
   constructor(
     svg = document.createElement("svg"),
     origin = { x: 0.5, y: 0.5 }
   ) {
     this.svg = svg;
-    this.elements = {};
     this.o = origin;
   }
   insert(...objects: Object3D[]) {
@@ -187,7 +187,7 @@ class SVG3D {
       this.elements[object.id] = object.unrotated3dPlane;
   }
   remove(...objects: Object3D[]) {
-    for (let object of objects) this.elements[object.id] = undefined;
+    for (let object of objects) delete this.elements[object.id];
   }
   async display() {
     this.svg.innerHTML = "";
@@ -210,11 +210,12 @@ class SVG3D {
 }
 
 class ID {
+  value: string;
   static i = ID.ids();
   constructor() {
     this.value = ID.i.next().value;
   }
-  static *ids() {
+  static *ids(): Generator<string> {
     var id = 0;
     while (true) yield (id++).toString(36);
   }

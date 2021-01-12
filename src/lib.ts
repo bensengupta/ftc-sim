@@ -60,6 +60,7 @@ class Path3D {
   rotateZ = 0;
   origin = new Point(0, 0);
   perspective: number;
+  zIndex: number = 0;
   constructor(...points: Point[]) {
     this.unrotated3dPlane = this.start = points;
     this.path2D = document.createElementNS(
@@ -67,6 +68,15 @@ class Path3D {
       "path"
     );
     this.perspective = 0;
+    this.calculateZIndex();
+  }
+  private calculateZIndex() {
+    let z = 0;
+    for (let point of this.unrotated3dPlane) {
+      z += point.z;
+    }
+    z /= this.unrotated3dPlane.length;
+    this.zIndex = z;
   }
   get rotated3dPlane() {
     var result = [];
@@ -81,6 +91,7 @@ class Path3D {
     for (let point of this.unrotated3dPlane)
       result.push(point.rotate(rx, ry, rz, origin));
     this.unrotated3dPlane = result;
+    this.calculateZIndex();
     return this;
   }
   display(origin = { x: 0, y: 0 }) {
@@ -185,12 +196,14 @@ class SVG3D {
   }
   display() {
     this.svg.innerHTML = "";
-    for (let id in this.elements)
-      for (let path of this.elements[id]) {
+    for (let id in this.elements) {
+      const paths = this.elements[id].sort((p1, p2) => p1.zIndex - p2.zIndex);
+      for (let path of paths) {
         var div = document.createElement("div");
         div.insertAdjacentElement("afterbegin", path.display(this.origin));
         this.svg.insertAdjacentHTML("beforeend", div.innerHTML);
       }
+    }
     // console.log(this.svg.innerHTML);
   }
   get origin() {

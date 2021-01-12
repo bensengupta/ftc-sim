@@ -54,8 +54,12 @@ var svg = new SVG3D(svgElem);
 
 // Create cube
 const cube = createCuboid(-100, -100, -100, 200, 200, 200);
+const cube2 = createCuboid(-100, -100, -100, 200, 200, 200);
+const angleOffset = (45 * Math.PI) / 180;
+cube2.rotate(angleOffset, angleOffset, 0);
 
 svg.insert(cube);
+svg.insert(cube2);
 svg.Perspective = 5e2;
 
 // Animate cube
@@ -79,6 +83,7 @@ svgElem.onmouseup = function () {
 svgElem.onmousemove = function ({ movementX, movementY }) {
   if (mousePressed) {
     cube.rotate(movementY * 8e-3, -movementX * 6e-3, 0);
+    cube2.rotate(movementY * 8e-3, -movementX * 6e-3, 0);
   }
 };
 

@@ -196,13 +196,13 @@ class SVG3D {
   }
   display() {
     this.svg.innerHTML = "";
-    for (let id in this.elements) {
-      const paths = this.elements[id].sort((p1, p2) => p1.zIndex - p2.zIndex);
-      for (let path of paths) {
-        var div = document.createElement("div");
-        div.insertAdjacentElement("afterbegin", path.display(this.origin));
-        this.svg.insertAdjacentHTML("beforeend", div.innerHTML);
-      }
+    const paths = Object.values(this.elements)
+      .flat()
+      .sort((p1, p2) => p1.zIndex - p2.zIndex);
+    for (let path of paths) {
+      var div = document.createElement("div");
+      div.insertAdjacentElement("afterbegin", path.display(this.origin));
+      this.svg.insertAdjacentHTML("beforeend", div.innerHTML);
     }
     // console.log(this.svg.innerHTML);
   }

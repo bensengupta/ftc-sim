@@ -52,19 +52,23 @@ function createCuboid(
 var svgElem = document.querySelector("svg")!;
 var svg = new SVG3D(svgElem);
 
-// Create cube
+// Create cubes
 const cube = createCuboid(-100, -100, -100, 200, 200, 200);
 const cube2 = createCuboid(-100, -100, -100, 200, 200, 200);
-const angleOffset = (45 * Math.PI) / 180;
-cube2.rotate(angleOffset, angleOffset, 0);
+
+// Tanslate cubes
+cube2.translate(-100, 100);
+cube2.rotate(Math.PI / 4);
 
 svg.insert(cube);
 svg.insert(cube2);
 svg.Perspective = 5e2;
 
-// Animate cube
+// Animate cubes
 function animate() {
   // cube.rotate(8e-3, 6e-3, 2.5e-3);
+  console.log(cube.AABB);
+  // cube2.rotate(-8e-3, -6e-3, -2.5e-3)
   svg.display();
   requestAnimationFrame(animate);
 }

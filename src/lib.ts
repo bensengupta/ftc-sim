@@ -45,8 +45,10 @@ class Point {
     return new Point(x1, y1, z1);
   }
   translate(tx = 0, ty = 0, tz = 0) {
-    this.x += tx, this.y += ty, this.z += tz;
-    return this
+    this.x += tx;
+    this.y += ty;
+    this.z += tz;
+    return this;
   }
   affineFunction(point2: Point) {
     var a = (point2.x - this.x) / (this.y - point2.y);
@@ -104,8 +106,10 @@ class Path3D {
       result.push(point.translate(tx, ty, tz));
     }
     this.unrotated3dPlane = result;
-    this.origin.x += tx, this.origin.y += ty, this.origin.z += tz;
-    return this
+    this.origin.x += tx;
+    this.origin.y += ty;
+    this.origin.z += tz;
+    return this;
   }
   display(origin = { x: 0, y: 0 }) {
     // console.log(origin, this.unrotated3dPlane);
@@ -126,14 +130,14 @@ class Path3D {
     for (let p of this.unrotated3dPlane) {
       var aff = p.affineFunction(
         this.unrotated3dPlane[
-        (this.unrotated3dPlane.indexOf(p) + 1) % this.unrotated3dPlane.length
+          (this.unrotated3dPlane.indexOf(p) + 1) % this.unrotated3dPlane.length
         ]
       );
       for (let p2 of path2.unrotated3dPlane) {
         var aff2 = p2.affineFunction(
           path2.unrotated3dPlane[
-          (path2.unrotated3dPlane.indexOf(p2) + 1) %
-          path2.unrotated3dPlane.length
+            (path2.unrotated3dPlane.indexOf(p2) + 1) %
+              path2.unrotated3dPlane.length
           ]
         );
         var x = (aff.oo - aff2.oo) / (aff2.CM - aff.CM);
@@ -177,7 +181,7 @@ class Object3D {
   }
   rotate(rx = 0, ry = 0, rz = 0, origin = this.origin) {
     var result = [];
-    console.log(origin)
+    console.log(origin);
     for (let path of this.unrotated3dPlane) {
       // console.log(path, this.unrotated3dPlane);
       result.push(path.rotate(rx, ry, rz, origin));
@@ -194,20 +198,29 @@ class Object3D {
       result.push(path.translate(tx, ty, tz));
     }
     this.unrotated3dPlane = result;
-    this.origin.x += tx, this.origin.y += ty, this.origin.z += tz;
+    this.origin.x += tx;
+    this.origin.y += ty;
+    this.origin.z += tz;
   }
   get AABB() {
-    var result = { x: Infinity, y: Infinity, z: Infinity, x1: -Infinity, y1: -Infinity, z1: -Infinity };
+    var result = {
+      x: Infinity,
+      y: Infinity,
+      z: Infinity,
+      x1: -Infinity,
+      y1: -Infinity,
+      z1: -Infinity,
+    };
     for (let path of this.unrotated3dPlane)
       for (let point of path.unrotated3dPlane) {
-        result.x = (result.x > point.x) ? point.x : result.x;
-        result.y = (result.y > point.y) ? point.y : result.y;
-        result.z = (result.z > point.z) ? point.z : result.z;
-        result.x1 = (result.x1 < point.x) ? point.x : result.x1;
-        result.y1 = (result.y1 < point.y) ? point.y : result.y1;
-        result.z1 = (result.z1 < point.z) ? point.z : result.z1;
+        result.x = result.x > point.x ? point.x : result.x;
+        result.y = result.y > point.y ? point.y : result.y;
+        result.z = result.z > point.z ? point.z : result.z;
+        result.x1 = result.x1 < point.x ? point.x : result.x1;
+        result.y1 = result.y1 < point.y ? point.y : result.y1;
+        result.z1 = result.z1 < point.z ? point.z : result.z1;
       }
-    return result
+    return result;
   }
 }
 

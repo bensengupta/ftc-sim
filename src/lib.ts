@@ -39,16 +39,16 @@ class Point {
       x = cos(angle) * r;
       y = sin(angle) * r;
     }
-    var x1 = /*round(*/ x + origin.x /*)*/,
-      y1 = /*round(*/ y + origin.y /*)*/,
-      z1 = /*round(*/ z + origin.z; /*)*/
+    var x1 = x + origin.x,
+      y1 = y + origin.y,
+      z1 = z + origin.z;
     return new Point(x1, y1, z1);
   }
   translate(tx = 0, ty = 0, tz = 0) {
     this.x += tx, this.y += ty, this.z += tz;
     return this
   }
-  affineFunction(point2: Point) {
+  affineFunction(point2: Point) { /*** Finds the affine function of the line that goes between this ans point2 ***/
     var a = (point2.x - this.x) / (this.y - point2.y);
     var b = point2.y - a * point2.x;
     return { CM: a, oo: b };
@@ -56,7 +56,7 @@ class Point {
 }
 
 class Path3D {
-  unrotated3dPlane: Point[];
+  unrotated3dPlane: Point[]; // We could possibly change the name unrotated3dPlane to something shorter and more appealing
   start: Point[];
   path2D: SVGPathElement;
   rotateX = 0;
@@ -73,24 +73,43 @@ class Path3D {
     );
     this.perspective = 0;
     this.calculateZIndex();
+    // On calcule une fonction affine : z = CMx*x + CMy*y + oo qui sert à déterminer si tous les points du path forment quelque chose de plat
+    /* Ce n'est pas terminé encore, il y a quelques problèmes quand CMx, CMy ou oo = Infinity ou -Infinity */
+    if (points.length > 3) {
+      var a = this.affine3dFunction();
+      for (let p of points) {
+        console.log(a, p)
+        var equ = (((a?.CMx ?? 0) * p.x === Infinity && (a?.CMy ?? 0) * p.y === -Infinity) || ((a?.CMx ?? 0) * p.x === -Infinity && (a?.CMy ?? 0) * p.y === Infinity)) ? a?.oo :
+          (((a?.CMx ?? 0) * p.x === Infinity && a?.oo === -Infinity) || ((a?.CMx ?? 0) * p.x === -Infinity && a?.oo === Infinity)) ? a?.CMy * p.y :
+            (((a?.CMy ?? 0) * p.y === Infinity && a?.oo === -Infinity) || ((a?.CMy ?? 0) * p.y === -Infinity && a?.oo === Infinity)) ? a?.CMx * p.x :
+              (a?.CMx ?? 0) * p.x + (a?.CMy ?? 0) * p.y + (a?.oo ?? 0);
+        console.log(a?.CMx === Infinity, a?.CMx === -Infinity, a?.CMy === Infinity, a?.CMy === -Infinity, a?.oo === Infinity, a?.oo === -Infinity)
+        var str = (a?.CMx ?? 0) * p.x + '+' + (a?.CMy ?? 0) * p.y + '+' + (a?.oo ?? 0) + ' = ' + equ;
+        if (equ != p.z) {
+          console.log(str, p.z)
+          //console.error("Path " + this + " is not flat: \n", 'Bumpy paths may appear distorted'); break
+        }
+      }
+    }
   }
-  private calculateZIndex() {
+  private calculateZIndex() { /*** Maybe we could make this a getter? ***/
     let z = 0;
     for (let point of this.unrotated3dPlane) {
-      z += point.z;
+      z += point.z; // It could be good if we had a viewer in SVG3D and then we find the distance between the viewer and the path 
     }
     z /= this.unrotated3dPlane.length;
     this.zIndex = z;
   }
-  get rotated3dPlane() {
-    var result = [];
-    for (let point of this.unrotated3dPlane)
-      result.push(
-        point.rotate(this.rotateX, this.rotateY, this.rotateZ, this.origin)
-      );
-    return result;
-  }
+  // get rotated3dPlane() {    /*** Useless yet ***/
+  //   var result = [];
+  //   for (let point of this.unrotated3dPlane)
+  //     result.push(
+  //       point.rotate(this.rotateX, this.rotateY, this.rotateZ, this.origin)
+  //     );
+  //   return result;
+  // }
   rotate(rx = 0, ry = 0, rz = 0, origin = { x: 0, y: 0, z: 0 }) {
+    console.log(origin)
     var result: Point[] = [];
     for (let point of this.unrotated3dPlane)
       result.push(point.rotate(rx, ry, rz, origin));
@@ -157,7 +176,7 @@ class Path3D {
   affine3dFunction() {
     if (this.unrotated3dPlane.length < 3) return null
     var A = this.unrotated3dPlane[0], B = this.unrotated3dPlane[1], C = this.unrotated3dPlane[2];
-    var a = (A.y - C.y) / (B.y - A.y), b = (A.x - C.x) / (B.x - A.x);
+    var a = (A.y - C.y) / ((B.y - A.y) < .001 ? .001 : B.y - A.y), b = (A.x - C.x) / ((B.x - A.x) < .001 ? .001 : B.x - A.x);
     var c = (a * (B.z - A.z) + C.z - A.z) / (a * (B.x - A.x) + C.x - A.x);
     var d = (b * (B.z - A.z) + C.z - A.z) / (b * (B.y - A.y) + C.y - A.y);
     var CMx = c, CMy = d, oo = A.z - c * A.x - d * A.y;
@@ -186,7 +205,7 @@ class Object3D {
   }
   rotate(rx = 0, ry = 0, rz = 0, origin = this.origin) {
     var result = [];
-    // console.log(origin)
+    console.log(origin)
     for (let path of this.unrotated3dPlane) {
       // console.log(path, this.unrotated3dPlane);
       result.push(path.rotate(rx, ry, rz, origin));

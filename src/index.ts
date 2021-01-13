@@ -90,20 +90,20 @@ var svg = new SVG3D(svgElem);
 // Create objects
 const cube = createCuboid(-100, -100, -100, 200, 200, 200);
 const cube2 = createCuboid(-100, -100, -100, 200, 200, 200);
-const sphere = Sphere(100,10,20);
-console.log(sphere)
+// const sphere = Sphere(100,20,30);
+// console.log(sphere)
 
 // Tanslate objects
 cube2.translate(-100, 100)
 
 svg.insert(cube);
 svg.insert(cube2)
-svg.insert(sphere)
+// svg.insert(sphere)
 svg.Perspective = 5e2;
 
 // Animate objects
 function animate() {
-  sphere.rotate(16e-3)
+  // sphere.rotate(16e-3)
   // cube.rotate(8e-3, 6e-3, 2.5e-3);
   // console.log(cube.AABB)
   // for (let path of cube.unrotated3dPlane)console.log(path.affine3dFunction())
@@ -126,6 +126,8 @@ svgElem.onmouseup = function () {
 svgElem.onmousemove = function ({ movementX, movementY }) {
   if (mousePressed) {
     cube.rotate(movementY * 8e-3, -movementX * 6e-3, 0);
+    // cube2.translate(movementX/5,-movementY/5)
+    cube2.rotate(movementY * 8e-3, -movementX * 6e-3)
   }
 };
 

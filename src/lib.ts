@@ -186,7 +186,7 @@ class Object3D {
   }
   rotate(rx = 0, ry = 0, rz = 0, origin = this.origin) {
     var result = [];
-    console.log(origin)
+    // console.log(origin)
     for (let path of this.unrotated3dPlane) {
       // console.log(path, this.unrotated3dPlane);
       result.push(path.rotate(rx, ry, rz, origin));

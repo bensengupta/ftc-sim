@@ -49,25 +49,64 @@ function createCuboid(
   return new Object3D(path1, path2, path3, path4, path5, path6);
 }
 
+function Sphere(r: number, lo: number, la: number) {
+  // Points
+  const ps: { [key: string]: Point } = {};
+  for (let lat = 0; lat < la; lat++)
+    for (let lon = 0; lon < lo; lon++) {
+      var angLO = lon/lo*Math.PI*2, angLA = lat/la*2*Math.PI
+      var x = Math.cos(angLO) * Math.cos(angLA) * r;
+      var y = Math.sin(angLA) * r;
+      var z = Math.sin(angLO) * Math.cos(angLA) * r;
+      ps[lat + ',' + lon] = new Point(x, y, z)
+    }
+
+  // Surfaces
+  const paths = []
+  for (let lat = 0; lat < la; lat++)
+    for (let lon = 0; lon < lo; lon++) {
+      var la1=((lat+1)%la),lo1=((lon+1)%lo);
+      paths.push(
+        new Path3D(
+          ps[lat + ',' + lon],
+          ps[la1 + ',' + lon],
+          ps[la1 + ',' + lo1],
+          ps[lat + ',' + lo1])
+      )
+      console.log(paths[paths.length-1])
+    }
+
+  // Color
+  for (let path of paths)
+    path.fill = 'rgb(' + Math.random() * 255 + ',' + Math.random() * 255 + ',' + Math.random() * 255 + ')';
+    paths[paths.length-1].fill='#ff0'
+
+  return new Object3D(...paths);
+}
+
 var svgElem = document.querySelector("svg")!;
 var svg = new SVG3D(svgElem);
 
-// Create cubes
+// Create objects
 const cube = createCuboid(-100, -100, -100, 200, 200, 200);
 const cube2 = createCuboid(-100, -100, -100, 200, 200, 200);
+const sphere = Sphere(100,10,20);
+console.log(sphere)
 
-// Tanslate cubes
-cube2.translate(-100,100)
-cube2.rotate(Math.PI/4)
+// Tanslate objects
+cube2.translate(-100, 100)
 
 svg.insert(cube);
 svg.insert(cube2)
+svg.insert(sphere)
 svg.Perspective = 5e2;
 
-// Animate cubes
+// Animate objects
 function animate() {
-  cube.rotate(8e-3, 6e-3, 2.5e-3);
-  console.log(cube.AABB)
+  sphere.rotate(16e-3)
+  // cube.rotate(8e-3, 6e-3, 2.5e-3);
+  // console.log(cube.AABB)
+  // for (let path of cube.unrotated3dPlane)console.log(path.affine3dFunction())
   // cube2.rotate(-8e-3, -6e-3, -2.5e-3)
   svg.display();
   requestAnimationFrame(animate);

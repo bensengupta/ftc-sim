@@ -154,6 +154,15 @@ class Path3D {
   set strokeWidth(w: string) {
     this.path2D.style.strokeWidth = w;
   }
+  affine3dFunction() {
+    if (this.unrotated3dPlane.length < 3) return null
+    var A = this.unrotated3dPlane[0], B = this.unrotated3dPlane[1], C = this.unrotated3dPlane[2];
+    var a = (A.y - C.y) / (B.y - A.y), b = (A.x - C.x) / (B.x - A.x);
+    var c = (a * (B.z - A.z) + C.z - A.z) / (a * (B.x - A.x) + C.x - A.x);
+    var d = (b * (B.z - A.z) + C.z - A.z) / (b * (B.y - A.y) + C.y - A.y);
+    var CMx = c, CMy = d, oo = A.z - c * A.x - d * A.y;
+    return { CMx: CMx, CMy: CMy, oo: oo }
+  }
 }
 
 class Object3D {

@@ -66,7 +66,7 @@ svg.Perspective = 5e2;
 
 // Animate cubes
 function animate() {
-  // cube.rotate(8e-3, 6e-3, 2.5e-3);
+  cube.rotate(8e-3, 6e-3, 2.5e-3);
   console.log(cube.AABB)
   // cube2.rotate(-8e-3, -6e-3, -2.5e-3)
   svg.display();

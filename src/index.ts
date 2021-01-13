@@ -1,4 +1,4 @@
-import { SVG3D, Object3D, Path3D, Point } from "./lib";
+import { ID, Object3D, Path3D, Point, SVG3D, Vector, Camera3D, OCS } from "./lib";
 
 function createCuboid(
   x: number,
@@ -130,6 +130,9 @@ svgElem.onmousemove = function ({ movementX, movementY }) {
     cube2.rotate(movementY * 8e-3, -movementX * 6e-3)
   }
 };
+
+var ocs = new OCS()
+setTimeout(()=>console.log(ocs),100)
 
 // Try removing if you have issues with hot-reloading
 if (module.hot) module.hot.accept();

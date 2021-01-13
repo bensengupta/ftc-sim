@@ -195,22 +195,17 @@ class Object3D {
     this.unrotated3dPlane = paths;
     this.id = new ID().value;
   }
-  get rotated3dPlane() {
+  // get rotated3dPlane() {  /*** Useless yet ***/
+  //   var result = [];
+  //   for (let path of this.unrotated3dPlane)
+  //     result.push(path.rotate(this.rotateX, this.rotateY, this.rotateZ, this.origin));
+  //   return result;
+  // }
+  rotate(rx = 0, ry = 0, rz = 0, origin = this.defaultOrigin) {
     var result = [];
+    // console.log(origin)
     for (let path of this.unrotated3dPlane)
-      result.push(
-        path.rotate(this.rotateX, this.rotateY, this.rotateZ, this.origin)
-      );
-    return result;
-  }
-  rotate(rx = 0, ry = 0, rz = 0, origin = this.origin) {
-    var result = [];
-    console.log(origin)
-    for (let path of this.unrotated3dPlane) {
-      // console.log(path, this.unrotated3dPlane);
       result.push(path.rotate(rx, ry, rz, origin));
-    }
-    // console.log(result);
     this.unrotated3dPlane = result;
   }
   set rotation(r: { x: number; y: number; z: number }) {
@@ -218,9 +213,8 @@ class Object3D {
   }
   translate(tx = 0, ty = 0, tz = 0) {
     var result = [];
-    for (let path of this.unrotated3dPlane) {
+    for (let path of this.unrotated3dPlane)
       result.push(path.translate(tx, ty, tz));
-    }
     this.unrotated3dPlane = result;
     this.origin.x += tx, this.origin.y += ty, this.origin.z += tz;
   }
@@ -236,6 +230,10 @@ class Object3D {
         result.z1 = (result.z1 < point.z) ? point.z : result.z1;
       }
     return result
+  }
+  get defaultOrigin() {
+    var aabb = this.AABB;
+    return new Point((aabb.x + aabb.x1) / 2, (aabb.y + aabb.y1) / 2, (aabb.z + aabb.z1) / 2)
   }
 }
 
@@ -278,6 +276,10 @@ class SVG3D {
     for (let id in this.elements)
       for (let path of this.elements[id]) path.perspective = p;
   }
+  set viewer(viewer: Camera3D) {
+
+    this.display();
+  }
 }
 
 class Camera3D {
@@ -288,7 +290,14 @@ class Camera3D {
     this.orientation = o;
   }
   get vector() {
-    return new Vector(this.position,this.orientation)
+    return new Vector(this.position, this.orientation)
+  }
+  LonLat(ocs: OCS = new OCS(this.position)) {
+
+    return {}
+  }
+  set Orientation(o: Point) {
+    this.orientation = o;
   }
 }
 
@@ -296,21 +305,45 @@ class Vector {
   x: number;
   y: number;
   z: number;
-  constructor(A: Point, B: Point) {
-    this.x = B.x - A.x;
-    this.y = B.y - A.y;
-    this.z = B.z - A.z;
+  constructor(A: Point, B: Point | undefined = undefined) {
+    if (B === undefined) {
+      this.x = A.x; this.y = A.y; this.z = A.z;
+    } else {
+      this.x = B.x - A.x;
+      this.y = B.y - A.y;
+      this.z = B.z - A.z;
+    }
   }
-  add(v2:Vector){
-    this.x+=v2.x
-    this.y+=v2.y
-    this.z+=v2.z
+  add(v2: Vector) {
+    this.x += v2.x;
+    this.y += v2.y;
+    this.z += v2.z;
+    return this;
   }
-  multiply(l:number){
-    this.x*=l
-    this.y*=l
-    this.z*=l
+  subtract(v2: Vector) { return this.add(v2.multiply(-1)) }
+  multiply(l: number) {
+    this.x *= l;
+    this.y *= l;
+    this.z *= l;
+    return this;
   }
+  divide(l: number) { return this.multiply(1 / l); }
+  get norme() { return (this.x ** 2 + this.y ** 2 + this.z ** 2) ** (1 / 2) }
+}
+
+class OCS { /*** Orthonormal Coordinate System ***/ // Can be used for origin /// Not so useful yet
+  x: number; y: number; z: number;
+  O: Point;
+  i: number; j: number; k: number;
+  constructor(O: Point = new Point(), ǁiǁ: number = 1, ǁjǁ: number = 1, ǁkǁ: number = 1) {
+    this.O = O;
+    this.i = ǁiǁ; this.j = ǁjǁ; this.k = ǁkǁ;
+    this.x = O.x, this.y = O.y, this.z = O.z;
+  }
+}
+
+class Direction{
+  
 }
 
 class ID {
@@ -325,4 +358,4 @@ class ID {
   }
 }
 
-export { ID, Object3D, Path3D, Point, SVG3D };
+export { ID, Object3D, Path3D, Point, SVG3D, Vector, Camera3D, OCS };

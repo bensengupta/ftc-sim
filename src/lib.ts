@@ -39,10 +39,10 @@ class Point {
       x = cos(angle) * r;
       y = sin(angle) * r;
     }
-    var x1 = x + origin.x,
-      y1 = y + origin.y,
-      z1 = z + origin.z;
-    return new Point(x1, y1, z1);
+    this.x = x + origin.x,
+      this.y = y + origin.y,
+      this.z = z + origin.z;
+    return this;
   }
   translate(tx = 0, ty = 0, tz = 0) {
     this.x += tx, this.y += ty, this.z += tz;
@@ -277,6 +277,39 @@ class SVG3D {
   set Perspective(p: number) {
     for (let id in this.elements)
       for (let path of this.elements[id]) path.perspective = p;
+  }
+}
+
+class Camera3D {
+  position: Point;
+  orientation: Point;
+  constructor(p = new Point(0, 0, 0), o = new Point(0, 0, 1)) {
+    this.position = p;
+    this.orientation = o;
+  }
+  get vector() {
+    return new Vector(this.position,this.orientation)
+  }
+}
+
+class Vector {
+  x: number;
+  y: number;
+  z: number;
+  constructor(A: Point, B: Point) {
+    this.x = B.x - A.x;
+    this.y = B.y - A.y;
+    this.z = B.z - A.z;
+  }
+  add(v2:Vector){
+    this.x+=v2.x
+    this.y+=v2.y
+    this.z+=v2.z
+  }
+  multiply(l:number){
+    this.x*=l
+    this.y*=l
+    this.z*=l
   }
 }
 

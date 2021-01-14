@@ -1,13 +1,4 @@
-import {
-  ID,
-  Object3D,
-  Path3D,
-  Point,
-  SVG3D,
-  Vector,
-  Camera3D,
-  OCS,
-} from "./lib";
+import * as Lib3D from "./lib";
 
 function createCuboid(
   x: number,
@@ -18,22 +9,22 @@ function createCuboid(
   d: number
 ) {
   // Points
-  const p1 = new Point(x, y, z);
-  const p2 = new Point(x, y, z + d);
-  const p3 = new Point(x, y + h, z);
-  const p4 = new Point(x, y + h, z + d);
-  const p5 = new Point(x + w, y, z);
-  const p6 = new Point(x + w, y, z + d);
-  const p7 = new Point(x + w, y + h, z);
-  const p8 = new Point(x + w, y + h, z + d);
+  const p1 = new Lib3D.Point(x, y, z);
+  const p2 = new Lib3D.Point(x, y, z + d);
+  const p3 = new Lib3D.Point(x, y + h, z);
+  const p4 = new Lib3D.Point(x, y + h, z + d);
+  const p5 = new Lib3D.Point(x + w, y, z);
+  const p6 = new Lib3D.Point(x + w, y, z + d);
+  const p7 = new Lib3D.Point(x + w, y + h, z);
+  const p8 = new Lib3D.Point(x + w, y + h, z + d);
 
   // Surfaces
-  const path1 = new Path3D(p1, p2, p4, p3);
-  const path2 = new Path3D(p2, p1, p5, p6);
-  const path3 = new Path3D(p1, p3, p7, p5);
-  const path4 = new Path3D(p4, p2, p6, p8);
-  const path5 = new Path3D(p6, p5, p7, p8);
-  const path6 = new Path3D(p3, p4, p8, p7);
+  const path1 = new Lib3D.Path3D(p1, p2, p4, p3);
+  const path2 = new Lib3D.Path3D(p2, p1, p5, p6);
+  const path3 = new Lib3D.Path3D(p1, p3, p7, p5);
+  const path4 = new Lib3D.Path3D(p4, p2, p6, p8);
+  const path5 = new Lib3D.Path3D(p6, p5, p7, p8);
+  const path6 = new Lib3D.Path3D(p3, p4, p8, p7);
 
   // Color
   path1.fill = "red";
@@ -55,12 +46,12 @@ function createCuboid(
   path6.stroke = "#000";
   path6.strokeWidth = "1";
 
-  return new Object3D(path1, path2, path3, path4, path5, path6);
+  return new Lib3D.Object3D(path1, path2, path3, path4, path5, path6);
 }
 
 function Sphere(r: number, lo: number, la: number) {
   // Points
-  const ps: { [key: string]: Point } = {};
+  const ps: { [key: string]: Lib3D.Point } = {};
   for (let lat = 0; lat < la; lat++)
     for (let lon = 0; lon < lo; lon++) {
       var angLO = (lon / lo) * Math.PI * 2,
@@ -68,7 +59,7 @@ function Sphere(r: number, lo: number, la: number) {
       var x = Math.cos(angLO) * Math.cos(angLA) * r;
       var y = Math.sin(angLA) * r;
       var z = Math.sin(angLO) * Math.cos(angLA) * r;
-      ps[lat + "," + lon] = new Point(x, y, z);
+      ps[lat + "," + lon] = new Lib3D.Point(x, y, z);
     }
 
   // Surfaces
@@ -78,7 +69,7 @@ function Sphere(r: number, lo: number, la: number) {
       var la1 = (lat + 1) % la,
         lo1 = (lon + 1) % lo;
       paths.push(
-        new Path3D(
+        new Lib3D.Path3D(
           ps[lat + "," + lon],
           ps[la1 + "," + lon],
           ps[la1 + "," + lo1],
@@ -100,11 +91,11 @@ function Sphere(r: number, lo: number, la: number) {
       ")";
   paths[paths.length - 1].fill = "#ff0";
 
-  return new Object3D(...paths);
+  return new Lib3D.Object3D(...paths);
 }
 
 var svgElem = document.querySelector("svg")!;
-var svg = new SVG3D(svgElem);
+var svg = new Lib3D.SVG3D(svgElem);
 
 // Create objects
 const cube = createCuboid(-100, -100, -100, 200, 200, 200);
@@ -142,6 +133,9 @@ svgElem.onmousedown = function () {
 svgElem.onmouseup = function () {
   mousePressed = false;
 };
+svgElem.onmouseleave = function () {
+  mousePressed = false;
+};
 svgElem.onmousemove = function ({ movementX, movementY }) {
   if (mousePressed) {
     cube.rotate(movementY * 8e-3, -movementX * 6e-3, 0);
@@ -150,7 +144,7 @@ svgElem.onmousemove = function ({ movementX, movementY }) {
   }
 };
 
-var ocs = new OCS();
+var ocs = new Lib3D.OCS();
 setTimeout(() => console.log(ocs), 100);
 
 // Try removing if you have issues with hot-reloading

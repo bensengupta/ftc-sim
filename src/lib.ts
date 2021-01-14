@@ -39,10 +39,8 @@ class Point {
       x = cos(angle) * r;
       y = sin(angle) * r;
     }
-    var x1 = /*round(*/ x + origin.x /*)*/,
-      y1 = /*round(*/ y + origin.y /*)*/,
-      z1 = /*round(*/ z + origin.z; /*)*/
-    return new Point(x1, y1, z1);
+    (this.x = x + origin.x), (this.y = y + origin.y), (this.z = z + origin.z);
+    return this;
   }
   translate(tx = 0, ty = 0, tz = 0) {
     this.x += tx;
@@ -51,6 +49,7 @@ class Point {
     return this;
   }
   affineFunction(point2: Point) {
+    /*** Finds the affine function of the line that goes between this ans point2 ***/
     var a = (point2.x - this.x) / (this.y - point2.y);
     var b = point2.y - a * point2.x;
     return { CM: a, oo: b };
@@ -58,7 +57,7 @@ class Point {
 }
 
 class Path3D {
-  unrotated3dPlane: Point[];
+  unrotated3dPlane: Point[]; // We could possibly change the name unrotated3dPlane to something shorter and more appealing
   start: Point[];
   path2D: SVGPathElement;
   rotateX = 0;
@@ -75,24 +74,67 @@ class Path3D {
     );
     this.perspective = 0;
     this.calculateZIndex();
+    // On calcule une fonction affine : z = CMx*x + CMy*y + oo qui sert à déterminer si tous les points du path forment quelque chose de plat
+    /* Ce n'est pas terminé encore, il y a quelques problèmes quand CMx, CMy ou oo = Infinity ou -Infinity */
+    if (points.length > 3) {
+      var a = this.affine3dFunction();
+      for (let p of points) {
+        console.log(a, p);
+        var equ =
+          ((a?.CMx ?? 0) * p.x === Infinity &&
+            (a?.CMy ?? 0) * p.y === -Infinity) ||
+          ((a?.CMx ?? 0) * p.x === -Infinity &&
+            (a?.CMy ?? 0) * p.y === Infinity)
+            ? a?.oo
+            : ((a?.CMx ?? 0) * p.x === Infinity && a?.oo === -Infinity) ||
+              ((a?.CMx ?? 0) * p.x === -Infinity && a?.oo === Infinity)
+            ? a?.CMy * p.y
+            : ((a?.CMy ?? 0) * p.y === Infinity && a?.oo === -Infinity) ||
+              ((a?.CMy ?? 0) * p.y === -Infinity && a?.oo === Infinity)
+            ? a?.CMx * p.x
+            : (a?.CMx ?? 0) * p.x + (a?.CMy ?? 0) * p.y + (a?.oo ?? 0);
+        console.log(
+          a?.CMx === Infinity,
+          a?.CMx === -Infinity,
+          a?.CMy === Infinity,
+          a?.CMy === -Infinity,
+          a?.oo === Infinity,
+          a?.oo === -Infinity
+        );
+        var str =
+          (a?.CMx ?? 0) * p.x +
+          "+" +
+          (a?.CMy ?? 0) * p.y +
+          "+" +
+          (a?.oo ?? 0) +
+          " = " +
+          equ;
+        if (equ != p.z) {
+          console.log(str, p.z);
+          //console.error("Path " + this + " is not flat: \n", 'Bumpy paths may appear distorted'); break
+        }
+      }
+    }
   }
   private calculateZIndex() {
+    /*** Maybe we could make this a getter? ***/
     let z = 0;
     for (let point of this.unrotated3dPlane) {
-      z += point.z;
+      z += point.z; // It could be good if we had a viewer in SVG3D and then we find the distance between the viewer and the path
     }
     z /= this.unrotated3dPlane.length;
     this.zIndex = z;
   }
-  get rotated3dPlane() {
-    var result = [];
-    for (let point of this.unrotated3dPlane)
-      result.push(
-        point.rotate(this.rotateX, this.rotateY, this.rotateZ, this.origin)
-      );
-    return result;
-  }
+  // get rotated3dPlane() {    /*** Useless yet ***/
+  //   var result = [];
+  //   for (let point of this.unrotated3dPlane)
+  //     result.push(
+  //       point.rotate(this.rotateX, this.rotateY, this.rotateZ, this.origin)
+  //     );
+  //   return result;
+  // }
   rotate(rx = 0, ry = 0, rz = 0, origin = { x: 0, y: 0, z: 0 }) {
+    console.log(origin);
     var result: Point[] = [];
     for (let point of this.unrotated3dPlane)
       result.push(point.rotate(rx, ry, rz, origin));
@@ -158,6 +200,20 @@ class Path3D {
   set strokeWidth(w: string) {
     this.path2D.style.strokeWidth = w;
   }
+  affine3dFunction() {
+    if (this.unrotated3dPlane.length < 3) return null;
+    var A = this.unrotated3dPlane[0],
+      B = this.unrotated3dPlane[1],
+      C = this.unrotated3dPlane[2];
+    var a = (A.y - C.y) / (B.y - A.y < 0.001 ? 0.001 : B.y - A.y),
+      b = (A.x - C.x) / (B.x - A.x < 0.001 ? 0.001 : B.x - A.x);
+    var c = (a * (B.z - A.z) + C.z - A.z) / (a * (B.x - A.x) + C.x - A.x);
+    var d = (b * (B.z - A.z) + C.z - A.z) / (b * (B.y - A.y) + C.y - A.y);
+    var CMx = c,
+      CMy = d,
+      oo = A.z - c * A.x - d * A.y;
+    return { CMx: CMx, CMy: CMy, oo: oo };
+  }
 }
 
 class Object3D {
@@ -171,22 +227,17 @@ class Object3D {
     this.unrotated3dPlane = paths;
     this.id = new ID().value;
   }
-  get rotated3dPlane() {
+  // get rotated3dPlane() {  /*** Useless yet ***/
+  //   var result = [];
+  //   for (let path of this.unrotated3dPlane)
+  //     result.push(path.rotate(this.rotateX, this.rotateY, this.rotateZ, this.origin));
+  //   return result;
+  // }
+  rotate(rx = 0, ry = 0, rz = 0, origin = this.defaultOrigin) {
     var result = [];
+    // console.log(origin)
     for (let path of this.unrotated3dPlane)
-      result.push(
-        path.rotate(this.rotateX, this.rotateY, this.rotateZ, this.origin)
-      );
-    return result;
-  }
-  rotate(rx = 0, ry = 0, rz = 0, origin = this.origin) {
-    var result = [];
-    console.log(origin);
-    for (let path of this.unrotated3dPlane) {
-      // console.log(path, this.unrotated3dPlane);
       result.push(path.rotate(rx, ry, rz, origin));
-    }
-    // console.log(result);
     this.unrotated3dPlane = result;
   }
   set rotation(r: { x: number; y: number; z: number }) {
@@ -194,9 +245,8 @@ class Object3D {
   }
   translate(tx = 0, ty = 0, tz = 0) {
     var result = [];
-    for (let path of this.unrotated3dPlane) {
+    for (let path of this.unrotated3dPlane)
       result.push(path.translate(tx, ty, tz));
-    }
     this.unrotated3dPlane = result;
     this.origin.x += tx;
     this.origin.y += ty;
@@ -221,6 +271,14 @@ class Object3D {
         result.z1 = result.z1 < point.z ? point.z : result.z1;
       }
     return result;
+  }
+  get defaultOrigin() {
+    var aabb = this.AABB;
+    return new Point(
+      (aabb.x + aabb.x1) / 2,
+      (aabb.y + aabb.y1) / 2,
+      (aabb.z + aabb.z1) / 2
+    );
   }
 }
 
@@ -263,7 +321,91 @@ class SVG3D {
     for (let id in this.elements)
       for (let path of this.elements[id]) path.perspective = p;
   }
+  set viewer(viewer: Camera3D) {
+    this.display();
+  }
 }
+
+class Camera3D {
+  position: Point;
+  orientation: Point;
+  constructor(p = new Point(0, 0, 0), o = new Point(0, 0, 1)) {
+    this.position = p;
+    this.orientation = o;
+  }
+  get vector() {
+    return new Vector(this.position, this.orientation);
+  }
+  LonLat(ocs: OCS = new OCS(this.position)) {
+    return {};
+  }
+  set Orientation(o: Point) {
+    this.orientation = o;
+  }
+}
+
+class Vector {
+  x: number;
+  y: number;
+  z: number;
+  constructor(A: Point, B: Point | undefined = undefined) {
+    if (B === undefined) {
+      this.x = A.x;
+      this.y = A.y;
+      this.z = A.z;
+    } else {
+      this.x = B.x - A.x;
+      this.y = B.y - A.y;
+      this.z = B.z - A.z;
+    }
+  }
+  add(v2: Vector) {
+    this.x += v2.x;
+    this.y += v2.y;
+    this.z += v2.z;
+    return this;
+  }
+  subtract(v2: Vector) {
+    return this.add(v2.multiply(-1));
+  }
+  multiply(l: number) {
+    this.x *= l;
+    this.y *= l;
+    this.z *= l;
+    return this;
+  }
+  divide(l: number) {
+    return this.multiply(1 / l);
+  }
+  get norme() {
+    return (this.x ** 2 + this.y ** 2 + this.z ** 2) ** (1 / 2);
+  }
+}
+
+class OCS {
+  /*** Orthonormal Coordinate System ***/ // Can be used for origin /// Not so useful yet
+  x: number;
+  y: number;
+  z: number;
+  O: Point;
+  i: number;
+  j: number;
+  k: number;
+  constructor(
+    O: Point = new Point(),
+    ǁiǁ: number = 1,
+    ǁjǁ: number = 1,
+    ǁkǁ: number = 1
+  ) {
+    this.O = O;
+    this.i = ǁiǁ;
+    this.j = ǁjǁ;
+    this.k = ǁkǁ;
+    (this.x = O.x), (this.y = O.y), (this.z = O.z);
+  }
+}
+
+class Direction {}
 
 class ID {
   value: string;
@@ -277,4 +419,4 @@ class ID {
   }
 }
 
-export { ID, Object3D, Path3D, Point, SVG3D };
+export { ID, Object3D, Path3D, Point, SVG3D, Vector, Camera3D, OCS };

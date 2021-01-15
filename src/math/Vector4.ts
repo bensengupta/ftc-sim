@@ -1,25 +1,22 @@
 import { Point } from "./Point";
 
-class Vector3 {
-  constructor(public x = 0, public y = 0, public z = 0) {}
-  setFromPoints(A: Point, B: Point) {
-    this.x = B.x - A.x;
-    this.y = B.y - A.y;
-    this.z = B.z - A.z;
-  }
-  add(v2: Vector3) {
+class Vector4 {
+  constructor(public x = 0, public y = 0, public z = 0, public w = 1) {}
+  add(v2: Vector4) {
     this.x += v2.x;
     this.y += v2.y;
     this.z += v2.z;
+    this.w += v2.w;
     return this;
   }
-  subtract(v2: Vector3) {
+  subtract(v2: Vector4) {
     return this.add(v2.multiply(-1));
   }
   multiply(l: number) {
     this.x *= l;
     this.y *= l;
     this.z *= l;
+    this.w *= l;
     return this;
   }
   divide(l: number) {
@@ -30,4 +27,4 @@ class Vector3 {
   }
 }
 
-export { Vector3 };
+export { Vector4 };

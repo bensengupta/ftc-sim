@@ -95,7 +95,10 @@ function Sphere(r: number, lo: number, la: number) {
 }
 
 var svgElem = document.querySelector("svg")!;
-var svg = new Lib3D.SVG3D(svgElem);
+const svg = new Lib3D.SvgRenderer({ svg: svgElem });
+const scene = new Lib3D.Scene();
+const camera = new Lib3D.Camera3D();
+
 
 // Create objects
 const cube = createCuboid(-100, -100, -100, 200, 200, 200);
@@ -106,23 +109,25 @@ const cube2 = createCuboid(-100, -100, -100, 200, 200, 200);
 // Tanslate objects
 cube2.translate(-100, 100);
 
-svg.insert(cube);
-svg.insert(cube2);
+scene.add(cube);
+scene.add(cube2);
+
 // svg.insert(sphere)
-svg.Perspective = 5e2;
+camera.perspective = 5e2;
+// svg.Perspective = 5e2;
 
 // Animate objects
 function animate() {
+  requestAnimationFrame(animate);
+  svg.render(scene, camera);
   // sphere.rotate(16e-3)
   // cube.rotate(8e-3, 6e-3, 2.5e-3);
   // console.log(cube.AABB)
   // for (let path of cube.unrotated3dPlane)console.log(path.affine3dFunction())
   // cube2.rotate(-8e-3, -6e-3, -2.5e-3)
-  svg.display();
-  requestAnimationFrame(animate);
 }
 
-requestAnimationFrame(animate);
+animate();
 
 // Rotate cube
 var mousePressed = false;
@@ -143,9 +148,6 @@ svgElem.onmousemove = function ({ movementX, movementY }) {
     cube2.rotate(movementY * 8e-3, -movementX * 6e-3);
   }
 };
-
-var ocs = new Lib3D.OCS();
-setTimeout(() => console.log(ocs), 100);
 
 // Try removing if you have issues with hot-reloading
 if (module.hot) module.hot.accept();

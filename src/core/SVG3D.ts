@@ -1,5 +1,5 @@
 import { Path3D } from "../geometry/Path3D";
-import { Camera3D } from "./Camera3D";
+import { PerspectiveCamera } from "./PerspectiveCamera";
 import { Object3D } from "./Object3D";
 
 class SVG3D {
@@ -15,7 +15,7 @@ class SVG3D {
   }
   insert(...objects: Object3D[]) {
     for (let object of objects)
-      this.elements[object.id] = object.unrotated3dPlane;
+      this.elements[object.id] = object.paths;
   }
   remove(...objects: Object3D[]) {
     for (let object of objects) delete this.elements[object.id];
@@ -41,7 +41,7 @@ class SVG3D {
     for (let id in this.elements)
       for (let path of this.elements[id]) path.perspective = p;
   }
-  set viewer(viewer: Camera3D) {
+  set viewer(viewer: PerspectiveCamera) {
     this.display();
   }
 }

@@ -1,3 +1,4 @@
+import { Matrix4 } from "./Matrix4";
 import { Point } from "./Point";
 
 class Vector4 {
@@ -24,6 +25,24 @@ class Vector4 {
   }
   get norm() {
     return (this.x ** 2 + this.y ** 2 + this.z ** 2) ** (1 / 2);
+  }
+  /**
+   * Multiplies this vector by a given matrix.
+   */
+  multiplyMatrix(mat: Matrix4) {
+    const m = mat.elements;
+    
+    const x = m[0]  * this.x + m[1]  * this.y + m[2]  * this.z + m[3]  * this.w;
+    const y = m[4]  * this.x + m[5]  * this.y + m[6]  * this.z + m[7]  * this.w;
+    const z = m[8]  * this.x + m[9]  * this.y + m[10] * this.z + m[11] * this.w;
+    const w = m[12] * this.x + m[13] * this.y + m[14] * this.z + m[15] * this.w;
+
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.w = w;
+
+    return this;
   }
 }
 

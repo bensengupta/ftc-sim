@@ -1,7 +1,7 @@
-import { Matrix3 } from "../math/Matrix3";
+import { Matrix4 } from "../math/Matrix4";
 import { Point } from "../math/Point";
 import { Vector3 } from "../math/Vector3";
-import { Camera3D } from "./Camera3D";
+import { PerspectiveCamera } from "./PerspectiveCamera";
 import { Scene } from "./Scene";
 
 type SvgRendererOptions = {
@@ -43,33 +43,53 @@ class SvgRenderer {
   /**
    * Renders a given scene with a camera.
    */
-  render(scene: Scene, camera: Camera3D) {
+  render(scene: Scene, camera: PerspectiveCamera) {
     // Reset svg
     this.domElement.innerHTML = "";
 
-    // Collect all paths from objects in scene
-    const paths = scene.objects
-      .flatMap((obj) => obj.unrotated3dPlane)
-      .sort((p1, p2) => p2.zIndex - p1.zIndex);
-
     const div = document.createElement("div");
 
-    for (let path of paths) {
-      // console.log(origin, this.unrotated3dPlane);
-      let str = "";
-      for (let point of path.unrotated3dPlane) {
-        var coef =
-          camera.perspective > 0.003 ? 1 + point.z / camera.perspective : 1;
-        str +=
-          (path.unrotated3dPlane.indexOf(point) === 0 ? "M " : " L ") +
-          (scene.origin.x * this.domDimensions.x + point.x * coef) +
-          "," +
-          (scene.origin.y * this.domDimensions.x - point.y * coef);
-        // console.log(str);
-      }
-      path.path2D.setAttribute("d", str + " z")
+    const view = camera.getViewMatrix();
+    // temporary: empty matrix, fix when someone understands projection matrix
+    const projection = camera.projection;
 
-      div.insertAdjacentElement("afterbegin", path.path2D);
+    const screenX = scene.origin.x * this.domDimensions.x;
+    const screenY = scene.origin.y * this.domDimensions.y;
+
+    const sortedObjects = scene.objects.sort((obj1, obj2) => obj2.position.z - obj1.position.z);
+
+    const paths: [z: number, path: SVGPathElement][] = [];
+
+    // Step 1: Transform all vertices and track depth of paths
+    for (const obj of sortedObjects) {
+      const model = obj.getModelMatrix();
+
+      const mvpMatrix = new Matrix4().multiplyMatrix(projection).multiplyMatrix(view).multiplyMatrix(model);
+
+
+      for (const path of obj.paths) {
+        let pathStr = "";
+        let avgZ = 0;
+
+        path.vertices.forEach((vertice, index) => {
+          let newVert = vertice.toVector4().multiplyMatrix(mvpMatrix);
+          avgZ += newVert.z;
+          pathStr += `${index === 0 ? "M" : " L"} ${screenX + newVert.x}, ${screenY - newVert.y}`;
+        });
+
+        avgZ /= path.vertices.length;
+
+        path.path2D.setAttribute("d", pathStr + " z");
+
+        paths.push([avgZ, path.path2D]);
+      }
+    }
+
+    // Step 2: Render all paths in order of depth
+    const sortedPaths = paths.sort(([z1], [z2]) => z1 - z2).map(([z, domElem]) => domElem);
+
+    for (const domElem of sortedPaths) {
+      div.insertAdjacentElement("afterbegin", domElem);
       this.domElement.insertAdjacentHTML("beforeend", div.innerHTML);
     }
   }

@@ -1,8 +1,9 @@
 import { Point } from "../math/Point";
+import { Vector3 } from "../math/Vector3";
 
 class Path3D {
-  unrotated3dPlane: Point[]; // We could possibly change the name unrotated3dPlane to something shorter and more appealing
-  start: Point[];
+  vertices: Vector3[];
+  start: Vector3[];
   path2D: SVGPathElement;
   rotateX = 0;
   rotateY = 0;
@@ -10,8 +11,8 @@ class Path3D {
   origin = new Point(0, 0);
   perspective: number;
   zIndex: number = 0;
-  constructor(...points: Point[]) {
-    this.unrotated3dPlane = this.start = points;
+  constructor(...points: Vector3[]) {
+    this.vertices = this.start = points;
     this.path2D = document.createElementNS(
       "http://www.w3.org/2000/svg",
       "path"
@@ -23,7 +24,6 @@ class Path3D {
     if (points.length > 3) {
       var a = this.affine3dFunction();
       for (let p of points) {
-        console.log(a, p);
         var equ =
           ((a?.CMx ?? 0) * p.x === Infinity &&
             (a?.CMy ?? 0) * p.y === -Infinity) ||
@@ -37,14 +37,14 @@ class Path3D {
               ((a?.CMy ?? 0) * p.y === -Infinity && a?.oo === Infinity)
             ? a?.CMx * p.x
             : (a?.CMx ?? 0) * p.x + (a?.CMy ?? 0) * p.y + (a?.oo ?? 0);
-        console.log(
-          a?.CMx === Infinity,
-          a?.CMx === -Infinity,
-          a?.CMy === Infinity,
-          a?.CMy === -Infinity,
-          a?.oo === Infinity,
-          a?.oo === -Infinity
-        );
+        // console.log(
+        //   a?.CMx === Infinity,
+        //   a?.CMx === -Infinity,
+        //   a?.CMy === Infinity,
+        //   a?.CMy === -Infinity,
+        //   a?.oo === Infinity,
+        //   a?.oo === -Infinity
+        // );
         var str =
           (a?.CMx ?? 0) * p.x +
           "+" +
@@ -54,7 +54,7 @@ class Path3D {
           " = " +
           equ;
         if (equ != p.z) {
-          console.log(str, p.z);
+          // console.log(str, p.z);
           //console.error("Path " + this + " is not flat: \n", 'Bumpy paths may appear distorted'); break
         }
       }
@@ -63,10 +63,10 @@ class Path3D {
   private calculateZIndex() {
     /*** Maybe we could make this a getter? ***/
     let z = 0;
-    for (let point of this.unrotated3dPlane) {
+    for (let point of this.vertices) {
       z += point.z; // It could be good if we had a viewer in SVG3D and then we find the distance between the viewer and the path
     }
-    z /= this.unrotated3dPlane.length;
+    z /= this.vertices.length;
     this.zIndex = z;
   }
   // get rotated3dPlane() {    /*** Useless yet ***/
@@ -78,20 +78,20 @@ class Path3D {
   //   return result;
   // }
   rotate(rx = 0, ry = 0, rz = 0, origin = { x: 0, y: 0, z: 0 }) {
-    console.log(origin);
-    var result: Point[] = [];
-    for (let point of this.unrotated3dPlane)
+    // console.log(origin);
+    var result: Vector3[] = [];
+    for (let point of this.vertices)
       result.push(point.rotate(rx, ry, rz, origin));
-    this.unrotated3dPlane = result;
+    this.vertices = result;
     this.calculateZIndex();
     return this;
   }
   translate(tx = 0, ty = 0, tz = 0) {
     var result = [];
-    for (let point of this.unrotated3dPlane) {
+    for (let point of this.vertices) {
       result.push(point.translate(tx, ty, tz));
     }
-    this.unrotated3dPlane = result;
+    this.vertices = result;
     this.origin.x += tx;
     this.origin.y += ty;
     this.origin.z += tz;
@@ -100,10 +100,10 @@ class Path3D {
   display(origin = { x: 0, y: 0 }) {
     // console.log(origin, this.unrotated3dPlane);
     var str = "";
-    for (let point of this.unrotated3dPlane) {
+    for (let point of this.vertices) {
       var coef = this.perspective > 0.003 ? 1 + point.z / this.perspective : 1;
       str +=
-        (this.unrotated3dPlane.indexOf(point) === 0 ? "M " : " L ") +
+        (this.vertices.indexOf(point) === 0 ? "M " : " L ") +
         (origin.x + point.x * coef) +
         "," +
         (origin.y - point.y * coef);
@@ -113,17 +113,17 @@ class Path3D {
     return this.path2D;
   }
   intersects(path2: Path3D) {
-    for (let p of this.unrotated3dPlane) {
+    for (let p of this.vertices) {
       var aff = p.affineFunction(
-        this.unrotated3dPlane[
-          (this.unrotated3dPlane.indexOf(p) + 1) % this.unrotated3dPlane.length
+        this.vertices[
+          (this.vertices.indexOf(p) + 1) % this.vertices.length
         ]
       );
-      for (let p2 of path2.unrotated3dPlane) {
+      for (let p2 of path2.vertices) {
         var aff2 = p2.affineFunction(
-          path2.unrotated3dPlane[
-            (path2.unrotated3dPlane.indexOf(p2) + 1) %
-              path2.unrotated3dPlane.length
+          path2.vertices[
+            (path2.vertices.indexOf(p2) + 1) %
+              path2.vertices.length
           ]
         );
         var x = (aff.oo - aff2.oo) / (aff2.CM - aff.CM);
@@ -132,7 +132,7 @@ class Path3D {
     }
   }
   set rotation(r: { x: number; y: number; z: number }) {
-    this.unrotated3dPlane = this.start;
+    this.vertices = this.start;
     this.rotate((r.x, r.y, r.z));
   }
   set fill(f: string) {
@@ -145,10 +145,10 @@ class Path3D {
     this.path2D.style.strokeWidth = w;
   }
   affine3dFunction() {
-    if (this.unrotated3dPlane.length < 3) return null;
-    var A = this.unrotated3dPlane[0],
-      B = this.unrotated3dPlane[1],
-      C = this.unrotated3dPlane[2];
+    if (this.vertices.length < 3) return null;
+    var A = this.vertices[0],
+      B = this.vertices[1],
+      C = this.vertices[2];
     var a = (A.y - C.y) / (B.y - A.y < 0.001 ? 0.001 : B.y - A.y),
       b = (A.x - C.x) / (B.x - A.x < 0.001 ? 0.001 : B.x - A.x);
     var c = (a * (B.z - A.z) + C.z - A.z) / (a * (B.x - A.x) + C.x - A.x);

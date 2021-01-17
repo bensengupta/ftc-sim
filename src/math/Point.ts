@@ -49,7 +49,7 @@ class Point {
     return this;
   }
   affineFunction(point2: Point) {
-    /*** Finds the affine function of the line that goes between this ans point2 ***/
+    /*** Finds the affine function of the line that goes between this and point2 ***/
     var a = (point2.x - this.x) / (this.y - point2.y);
     var b = point2.y - a * point2.x;
     return { CM: a, oo: b };

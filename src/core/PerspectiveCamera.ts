@@ -6,8 +6,12 @@ import { Point } from "../math/Point";
 import { Vector3 } from "../math/Vector3";
 
 type CameraOptions = {
-  position?: Vector3;
-  orientation?: Euler;
+  x?: number;
+  y?: number;
+  z?: number;
+  rotX?: number;
+  rotY?: number;
+  rotZ?: number;
   fov?: number;
   aspectRatio?: number;
   renderDistance?: number;
@@ -58,12 +62,34 @@ class PerspectiveCamera {
    * @param options Optional Parameters
    */
   constructor(options: CameraOptions = {}) {
-    this.position = options.position ?? new Vector3(0, 0, 0);
-    this.orientation = options.orientation ?? new Euler(0, 0, 0);
+    this.position = new Vector3(
+      options.x ?? 0,
+      options.y ?? 0,
+      options.z ?? 0,
+    );
+    this.orientation = new Euler(
+      options.rotX ?? 0,
+      options.rotY ?? 0,
+      options.rotZ ?? 0,
+    );
     this.fov = options.fov ?? 90;
     this.aspectRatio = options.aspectRatio ?? 1;
     this.renderDistance = options.renderDistance ?? 100;
     this.projection = this.calculateProjectionMatrix();
+  }
+
+  /**
+   * Move the camera.
+   */
+  translate(tx: number, ty: number, tz: number) {
+    this.position.translate(tx, ty, tz);
+  }
+
+  /**
+   * Rotate the camera.
+   */
+  rotate(rx: number, ry: number, rz: number) {
+    this.orientation.rotate(rx, ry, rz);
   }
 
   /**
@@ -74,6 +100,9 @@ class PerspectiveCamera {
     return view.compose(this.position, this.orientation);
   }
   
+  /**
+   * Calculate Camera's projection matrix.
+   */
   private calculateProjectionMatrix() {
     // From scratchapixel.com (https://bit.ly/39ALRDg)
     const near = 0.1;
@@ -82,16 +111,6 @@ class PerspectiveCamera {
 
     const yScale = 1 / Math.tan(this.fov * MathUtils.DEG2RAD / 2);
     const xScale = yScale / this.aspectRatio;
-
-    // double yScale = 1.0 / tan(D2R * fov / 2);
-    // double xScale = yScale / aspect;
-    // double nearmfar = near - far;
-    // double m[] = {
-    //     xScale, 0, 0, 0,
-    //     0, yScale, 0, 0,
-    //     0, 0, (far + near) / nearmfar, -1,
-    //     0, 0, 2*far*near / nearmfar, 0 
-    // };
 
     const a11 = yScale;
     const a22 = xScale;

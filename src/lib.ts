@@ -5,6 +5,7 @@ export { SvgRenderer } from "./core/SvgRenderer";
 export { Scene } from "./core/Scene";
 export { Path3D } from "./geometry/Path3D";
 export { Box } from "./geometry/Box";
+export { Sphere } from "./geometry/Sphere";
 export { MathUtils } from "./math/MathUtils";
 export { OCS } from "./math/OCS";
 export { Point } from "./math/Point";

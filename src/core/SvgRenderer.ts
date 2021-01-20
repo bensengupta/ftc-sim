@@ -45,6 +45,7 @@ class SvgRenderer {
    */
   render(scene: Scene, camera: PerspectiveCamera) {
     // Reset svg
+    this.domElement.style.backgroundColor = scene.background;
     this.domElement.innerHTML = "";
 
     const div = document.createElement("div");

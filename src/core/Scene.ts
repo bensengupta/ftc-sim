@@ -13,7 +13,7 @@ class Scene {
   origin: Point;
 
   constructor(options: SceneOptions = {}) {
-    this.background = options.background ?? "#000";
+    this.background = options.background ?? "#fff";
     this.objects = options.objects ?? [];
     this.origin = options.origin ?? new Point(0.5, 0.5);
   }

@@ -1,8 +1,9 @@
 import { clamp } from "lodash";
-import { DEG_TO_RAD, RAD_TO_DEG, TWO_PI } from "./helpers";
-import { Path, PathPoint, Point, lineCircleIntersection } from "./Path";
+import { RobotPose } from "../robot";
+import { DEG_TO_RAD } from "../../helpers";
+import { Path, PathPoint, lineCircleIntersection } from "./Path";
 
-export type RobotProperties = {
+export type MovementProperties = {
   /**
    * Robot pose: position and orientation.
    */
@@ -21,16 +22,8 @@ export type RobotProperties = {
   turnSpeed: number;
 };
 
-export class RobotPose {
-  constructor(public x: number, public y: number, public heading: number) {}
-
-  toPoint(): Point {
-    return new Point(this.x, this.y);
-  }
-}
-
-export class Robot {
-  constructor(public robotProperties: RobotProperties) {}
+export class Movement {
+  constructor(public robotProperties: MovementProperties) {}
 
   lastFront = 0;
   lastSideways = 0;
@@ -142,7 +135,6 @@ export class Robot {
     const relativeTurnAngle =
       relativeAngleToTarget - 90 * DEG_TO_RAD + path.preferredHeading;
     const turnPower = clamp(relativeTurnAngle / (30 * DEG_TO_RAD), -1, 1);
-    console.log(`trying ${movementXPower} ${movementYPower} ${turnPower}`);
 
     this.move(
       movementYPower * target.robotMoveSpeed,

@@ -23,7 +23,7 @@ module.exports = {
     extensions: [".ts", ".js"],
   },
   output: {
-    filename: "lib3d.bundle.js",
+    filename: "ftc-sim.bundle.js",
     path: path.resolve(__dirname, "dist"),
   },
   plugins: [

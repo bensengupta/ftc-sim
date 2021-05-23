@@ -2,29 +2,20 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>lib3d Test</title>
+    <title>FTC Sim</title>
 
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#007acc" />
 
-    <style>
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
-      svg {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 100%;
-      }
-    </style>
-    <script defer src="lib3d.bundle.js"></script>
+    <script defer src="ftc-sim.bundle.js"></script>
   </head>
   <body>
-    <svg></svg>
+    <canvas
+      id="canvas"
+      width="800"
+      height="800"
+      style="border: 1px solid black"
+    >
+    </canvas>
   </body>
 </html>

@@ -75,7 +75,7 @@ export class Sim {
       const elapsed = now - then;
 
       if (elapsed > interval) {
-        sim.fixedUpdate(elapsed / 100);
+        sim.fixedUpdate(elapsed / 1000);
 
         then = now;
       }

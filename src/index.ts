@@ -14,9 +14,9 @@ const sim = new Sim()
   .use(
     new PurePursuitMod({
       preferredHeading: 0,
-      frontSpeed: 100,
-      sidewaysSpeed: 100,
-      turnSpeed: Math.PI / 8,
+      frontSpeed: 1200,
+      sidewaysSpeed: 600,
+      turnSpeed: (Math.PI * 3) / 2,
       waypoints: [
         new Point(100, 100),
         new Point(500, 200),

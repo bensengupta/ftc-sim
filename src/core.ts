@@ -1,33 +1,35 @@
 type SimOptions = {
-  useKeyboard: boolean;
+  canvasId?: string;
 };
 
 export class Sim {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   resources: Record<string, any> = {};
-  modules: SimMod[] = [];
+  mods: SimMod[] = [];
 
-  constructor(public options: SimOptions) {
-    const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+  constructor(public options: SimOptions = {}) {
+    const canvas = document.getElementById(
+      options.canvasId ?? "canvas"
+    ) as HTMLCanvasElement;
     const ctx = canvas.getContext("2d")!;
     this.canvas = canvas;
     this.ctx = ctx;
   }
 
-  use(module: SimMod) {
-    module.init({
+  use(mod: SimMod) {
+    mod.init({
       canvas: this.canvas,
       ctx: this.ctx,
       resources: this.resources,
     });
-    this.modules.push(module);
+    this.mods.push(mod);
     return this;
   }
 
   private fixedUpdate(deltaTime: number) {
-    this.modules.forEach((module) => {
-      module.fixedUpdate({
+    this.mods.forEach((mod) => {
+      mod.fixedUpdate({
         canvas: this.canvas,
         ctx: this.ctx,
         resources: this.resources,
@@ -38,7 +40,7 @@ export class Sim {
 
   private render() {
     this.ctx.clearRect(0, 0, 3600, 3600);
-    this.modules.forEach((module) => {
+    this.mods.forEach((mod) => {
       this.ctx.setTransform(
         this.canvas.width / 3600,
         0,
@@ -47,7 +49,9 @@ export class Sim {
         0,
         0
       );
-      module.render({
+      this.ctx.lineWidth = 1;
+      this.ctx.strokeStyle = "rgb(0, 0, 0)";
+      mod.render({
         canvas: this.canvas,
         ctx: this.ctx,
         resources: this.resources,

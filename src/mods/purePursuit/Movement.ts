@@ -1,6 +1,6 @@
 import { clamp } from "lodash";
 import { RobotPose } from "../robot";
-import { DEG_TO_RAD } from "../../helpers";
+import { DEG_TO_RAD, TWO_PI } from "../../helpers";
 import { Path, PathPoint, lineCircleIntersection } from "./Path";
 
 export type MovementProperties = {
@@ -57,7 +57,7 @@ export class Movement {
     const s = Math.sin(pose.heading);
 
     pose.x += -sideways * c + front * s;
-    pose.y += sideways * s - front * c;
+    pose.y += -sideways * s - front * c;
     pose.heading += turn;
   }
 
@@ -122,7 +122,8 @@ export class Movement {
         : pointOutsideCircle.lookaheadDistance;
 
     const relativeAngleToTarget =
-      absoluteAngleToTarget - (robotPosition.heading - 180 * DEG_TO_RAD);
+      (absoluteAngleToTarget - (robotPosition.heading - 180 * DEG_TO_RAD)) %
+      TWO_PI;
     const relativeXToPoint = Math.cos(relativeAngleToTarget) * distanceToTarget;
     const relativeYToPoint = Math.sin(relativeAngleToTarget) * distanceToTarget;
 

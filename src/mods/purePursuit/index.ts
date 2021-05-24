@@ -48,7 +48,7 @@ export class PurePursuitMod extends SimMod {
 
   constructor(public properties: PurePursuitModProperties) {
     super();
-    const path = new Path(0);
+    const path = new Path(properties.preferredHeading);
     properties.waypoints.forEach((p) => {
       path.addPoint(p.x, p.y);
     });
@@ -57,7 +57,7 @@ export class PurePursuitMod extends SimMod {
 
   init({ resources, canvas }: SimInitParams<{ robotPose: RobotPose }>) {
     if (!resources.robotPose) {
-      console.error("PurePursuitModule must be initialised after RobotModule");
+      console.error("PurePursuitMod must be initialised after RobotMod");
     }
     const { frontSpeed, sidewaysSpeed, turnSpeed } = this.properties;
     this.robot = new Movement({
@@ -96,13 +96,13 @@ export class PurePursuitMod extends SimMod {
           f += 1;
         }
         if (map.get("KeyD")) {
-          s += 1;
+          s -= 1;
         }
         if (map.get("KeyS")) {
           f -= 1;
         }
         if (map.get("KeyA")) {
-          s -= 1;
+          s += 1;
         }
         if (map.get("KeyE")) {
           t += 1;
@@ -144,28 +144,6 @@ export class PurePursuitMod extends SimMod {
 
     const debug = this.robot?.followPath(this.path);
     if (debug) {
-      ctx.fillStyle = "rgb(0, 100, 100)";
-      ctx.beginPath();
-      drawPoint({
-        context: ctx,
-        x: debug.target.x,
-        y: debug.target.y,
-      });
-      ctx.fill();
-
-      ctx.lineWidth = 5;
-      ctx.beginPath();
-      const angle = resources.robotPose.heading - Math.PI / 2;
-      ctx.arc(
-        resources.robotPose.x,
-        resources.robotPose.y,
-        300,
-        angle,
-        angle + debug.relativeTurnAngle,
-        false
-      );
-      ctx.stroke();
-
       ctx.beginPath();
       ctx.moveTo(resources.robotPose.x, resources.robotPose.y);
       ctx.lineTo(
@@ -178,7 +156,7 @@ export class PurePursuitMod extends SimMod {
     // Draw Points
     points.forEach((point, index) => {
       ctx.fillStyle =
-        index === this.path.currentPointIndex
+        index === this.path.currentPointIndex + 1
           ? "rgb(200, 0, 0)"
           : "rgb(250, 200, 0)";
       ctx.beginPath();
@@ -188,7 +166,7 @@ export class PurePursuitMod extends SimMod {
 
     if (this.robot) {
       // Draw Lookahead circle
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.ellipse(
         resources.robotPose.x,

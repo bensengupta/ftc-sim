@@ -45,6 +45,7 @@ export class RobotMod extends SimMod {
       this.properties.length
     );
 
+    ctx.lineWidth = 3;
     // Draw Directional Vector Arrow
     ctx.beginPath();
     drawArrow(ctx, 0, 0, 0, this.properties.length);

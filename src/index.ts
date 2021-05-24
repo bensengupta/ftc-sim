@@ -1,8 +1,9 @@
 import { Sim } from "./core";
 import { RobotMod } from "./mods/robot";
 import { PurePursuitMod, Point } from "./mods/purePursuit";
+import { TraceRobotMod } from "./mods/traceRobot";
 
-const sim = new Sim({ useKeyboard: true })
+const sim = new Sim()
   .use(
     new RobotMod({
       color: "rgb(200, 0, 0)",
@@ -33,7 +34,8 @@ const sim = new Sim({ useKeyboard: true })
         new Point(3000, 500),
       ],
     })
-  );
+  )
+  .use(new TraceRobotMod());
 
 sim.start();
 

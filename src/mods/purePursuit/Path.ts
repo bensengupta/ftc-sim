@@ -77,9 +77,6 @@ export function lineCircleIntersection(
   linePoint1: Point,
   linePoint2: Point
 ): Point[] {
-  const dx = linePoint1.x - circleCenter.x;
-  const dy = linePoint1.y - circleCenter.y;
-
   if (Math.abs(linePoint2.x - linePoint1.x) <= 0.01) {
     linePoint2.x += 0.01;
   }
@@ -96,8 +93,8 @@ export function lineCircleIntersection(
   if (d >= 0) {
     // insert into quadratic formula
     const intersectX = [
-      (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a),
-      (-b - Math.sqrt(b * b - 4 * a * c)) / (2 * a),
+      (-b + Math.sqrt(d)) / (2 * a),
+      (-b - Math.sqrt(d)) / (2 * a),
     ];
     const intersections = intersectX.map((x) => new Point(x, m * x + p));
     if (d == 0) {

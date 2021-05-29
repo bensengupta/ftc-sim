@@ -12,6 +12,18 @@ export class RobotPose {
 
 type RobotModProperties = {
   /**
+   * Initial x position of the robot.
+   */
+  x: number;
+  /**
+   * Initial y position of the robot.
+   */
+  y: number;
+  /**
+   * Initial heading of the robot.
+   */
+  heading: number;
+  /**
    * Color of the robot.
    */
   color: string;
@@ -31,7 +43,11 @@ export class RobotMod extends SimMod {
   }
 
   init({ resources }: SimInitParams<{ robotPose: RobotPose }>) {
-    resources.robotPose = new RobotPose(0, 0, Math.PI);
+    resources.robotPose = new RobotPose(
+      this.properties.x,
+      this.properties.y,
+      this.properties.heading
+    );
   }
 
   render({ ctx, resources }: SimRenderParams<{ robotPose: RobotPose }>) {
